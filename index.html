@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz App</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: #0f172a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    color: white;
+}
+
+.quiz-container {
+    width: 90%;
+    max-width: 500px;
+    background: #1e293b;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#question {
+    font-size: 20px;
+    margin-bottom: 20px;
+}
+
+.answer-btn {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: #334155;
+    color: white;
+    font-size: 16px;
+    transition: 0.3s;
+}
+
+.answer-btn:hover {
+    background: #475569;
+}
+
+.correct {
+    background: green;
+}
+
+.wrong {
+    background: red;
+}
+
+#next-btn {
+    width: 100%;
+    padding: 12px;
+    margin-top: 15px;
+    border: none;
+    border-radius: 8px;
+    background: #2563eb;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    display: none;
+}
+
+#timer {
+    margin-top: 15px;
+    text-align: center;
+    font-size: 18px;
+}
+
+#score {
+    text-align: center;
+    margin-top: 15px;
+}
+</style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <h1>Quiz App</h1>
+
+    <div id="question">Question</div>
+
+    <div id="answers"></div>
+
+    <p id="timer">Time: 10</p>
+
+    <button id="next-btn">Next</button>
+
+    <p id="score"></p>
+</div>
+
+<script>
+const questions = [
+{
+    question: "What does HTML stand for?",
+    answers: [
+        { text: "Hyper Text Markup Language", correct: true },
+        { text: "High Transfer Machine Language", correct: false },
+        { text: "Hyper Transfer Markup Level", correct: false },
+        { text: "Home Tool Markup Language", correct: false }
+    ]
+},
+{
+    question: "Which language is used for styling web pages?",
+    answers: [
+        { text: "HTML", correct: false },
+        { text: "CSS", correct: true },
+        { text: "Python", correct: false },
+        { text: "Java", correct: false }
+    ]
+},
+{
+    question: "Which is used for web interactivity?",
+    answers: [
+        { text: "CSS", correct: false },
+        { text: "HTML", correct: false },
+        { text: "JavaScript", correct: true },
+        { text: "SQL", correct: false }
+    ]
+},
+{
+    question: "Which company developed JavaScript?",
+    answers: [
+        { text: "Google", correct: false },
+        { text: "Netscape", correct: true },
+        { text: "Microsoft", correct: false },
+        { text: "Apple", correct: false }
+    ]
+}
+];
+
+let currentQuestion = 0;
+let score = 0;
+let timeLeft = 10;
+let timer;
+
+const questionEl = document.getElementById("question");
+const answersEl = document.getElementById("answers");
+const nextBtn = document.getElementById("next-btn");
+const timerEl = document.getElementById("timer");
+const scoreEl = document.getElementById("score");
+
+function startQuiz() {
+    currentQuestion = 0;
+    score = 0;
+    nextBtn.innerText = "Next";
+    showQuestion();
+}
+
+function showQuestion() {
+    resetState();
+    startTimer();
+
+    let q = questions[currentQuestion];
+    questionEl.innerText = q.question;
+
+    q.answers.forEach(answer => {
+        const btn = document.createElement("button");
+        btn.innerText = answer.text;
+        btn.classList.add("answer-btn");
+
+        btn.addEventListener("click", () => selectAnswer(btn, answer.correct));
+
+        answersEl.appendChild(btn);
+    });
+}
+
+function resetState() {
+    nextBtn.style.display = "none";
+    clearInterval(timer);
+    timeLeft = 10;
+    timerEl.innerText = "Time: 10";
+
+    while (answersEl.firstChild) {
+        answersEl.removeChild(answersEl.firstChild);
+    }
+}
+
+function startTimer() {
+    timer = setInterval(() => {
+        timeLeft--;
+        timerEl.innerText = "Time: " + timeLeft;
+
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            nextBtn.style.display = "block";
+        }
+    }, 1000);
+}
+
+function selectAnswer(button, correct) {
+    clearInterval(timer);
+
+    if (correct) {
+        button.classList.add("correct");
+        score++;
+    } else {
+        button.classList.add("wrong");
+    }
+
+    Array.from(answersEl.children).forEach(btn => {
+        btn.disabled = true;
+    });
+
+    nextBtn.style.display = "block";
+}
+
+nextBtn.addEventListener("click", () => {
+    currentQuestion++;
+
+    if (currentQuestion < questions.length) {
+        showQuestion();
+    } else {
+        showResult();
+    }
+});
+
+function showResult() {
+    resetState();
+
+    questionEl.innerHTML = "Quiz Finished 🎉";
+    scoreEl.innerHTML = `You scored ${score} / ${questions.length}`;
+
+    nextBtn.innerText = "Restart";
+    nextBtn.style.display = "block";
+
+    nextBtn.onclick = startQuiz;
+}
+
+startQuiz();
+</script>
+
+</body>
+</html>
